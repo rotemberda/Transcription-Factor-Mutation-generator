@@ -22,8 +22,8 @@ This Python tool facilitates the generation of mutations in transcription factor
 
 1. Clone this repository:
    ```bash
-   git clone https://github.com/your-username/your-repository-name.git
-   cd your-repository-name
+   git clone https://github.com/rotemberda/Transcription-Factor-Mutation-generator.git
+   cd Transcription-Factor-Mutation-generator
    ```
 2. Install the required dependencies:
    ```bash
@@ -61,10 +61,10 @@ EQNARKHKQQ*,HKQQ,CACAAGCAGCAG,GAGCAGAACGCGAGAAAGCACAAGCAGCAGTAA
 
 ```bash
 python mutate_tf.py --input_csv input.csv \
-    --mutate_from MK --mutate_to LI
+    --mutate_from MK --mutate_to I
 ```
 
-#### Output CSV:
+#### Output CSV: 'input_MK_to_I.csv'
 
 ```csv
 AminoAcidSequence,DNASequence
