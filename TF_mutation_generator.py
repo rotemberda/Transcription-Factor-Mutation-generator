@@ -11,6 +11,7 @@ left to do:
 * write the output function
 * write the main function
 * write the testing program
+* create a requirements.txt file
 '''
 
 
