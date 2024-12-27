@@ -8,12 +8,11 @@ from collections import defaultdict    # for handeling count with dict
 
 '''
 left to do:
-* write the output function
-* write the main function
-* write the testing program
-* create a requirements.txt file
+* write the test file
 '''
 
+AMINO_ACIDS = "ACDEFGHIKLMNPQRSTVWY"
+methods = ['convert', 'shift']
 
 
 def main():
@@ -23,14 +22,20 @@ def main():
     # load the data
     tf_list = load_data(args.input_csv)
 
-    # 
+    # check which method to apply
+    if args.method == "convert":
+        output_file = args.input_csv[:-4] + "_" + args.mutation_targets + "_to_" + args.mutate_to +".csv"
+        for tf in tf_list:
+            convert(tf, args.mutation_targets, args.mutate_to)
 
+        output(tf_list, output_file)
 
-
-
-
-
-
+    elif args.method == "shift":
+        output_file = args.input_csv + "_" + args.mutation_targets + "_" + args.method + ".csv"
+        for tf in tf_list:
+            shift(tf, args.mutation_targets)
+        
+        output(tf_list, output_file)
 
 class TF:
     # defining Transcription Factor class
@@ -41,16 +46,16 @@ class TF:
         self.protein_dbd = protein_DBD
         self.full_dna = full_DNA
         self.dna_dbd = DNA_DBD
-        # automatically clean the dbd from the seq and setting IDRs seq
+    # automatically clean the dbd from the seq and setting IDRs seq
         self.clean_dbd()
 
-        # convertin the seq from strings to arrays for easier editting
+    # convertin the seq from strings to arrays for easier editting
         self.string_to_array()
     
     def clean_dbd(self):
     # creat the idr sequence
         self.protein_idr = self.full_protein.replace(self.protein_dbd + "*", "")
-        self.dna_idr = self.full_dna.replace(self.dna_dbd[:-3], "")
+        self.dna_idr = self.full_dna.replace(self.dna_dbd, "")[:-3]
     
     def string_to_array(self):
     # convert the sequences to be arrays for easeir manipulation
@@ -59,24 +64,36 @@ class TF:
         self.protein_idr = np.array(list(self.protein_idr))
         self.dna_idr = np.array([self.dna_idr[i:i+3] for i in range(0, len(self.dna_idr), 3)])
     
+    def assemble_mutated_sequence(self):
+    # convert the idr back to a string and save the full mutated sequence
+        self.mutated_protein = "".join(self.protein_idr.tolist()) + self.protein_dbd + "*"
+        self.mutated_dna = "".join(self.dna_idr.tolist()) + self.dna_dbd + self.full_dna[-1]
+        
+    
 def validate_inputs():
     # setting the CLA and validating inputs eith argparse
 
     parser = argparse.ArgumentParser(description="This program mutates a transcription factor sequence based on specified criteria")
     parser.add_argument('--input_csv', help = 'Input file name', required= True, type = str)
     parser.add_argument('--mutation_targets', help = 'A string of amino acids to mutate', required= True, type = str)
+    parser.add_argument("--method", help="Mutation method to apply. Options: " + str(methods), required= True,choices=methods, type = str)
     parser.add_argument("--mutate_to", help="A target amino acid to mutate into", type = str)
-    parser.add_argument("--method", help="Mutation method to apply", type = str)
+    
 
     # Parse the arguments
     args = parser.parse_args()
 
-    # check if at least one of the mutation methods were provided
-    if not (args.mutate_to or args.method):
-        parser.error("At least one of --mutate_to or --method must be provided.")
+    # check if a target amino acid was provided if the convert method was applied
+    if args.method == "convert" and not args.mutate_to:
+        parser.error("A target amino acid must be specified with the 'convert' method.")
     
-    # check that the nutate_to has one amino acid to mutate to
-    if args.mutate_to and len(args.mutate_to) != 1:
+    # make sure the aminoacids are in uppercase format
+    args.mutation_targets = args.mutation_targets.upper()
+    if args.method == "convert":
+        args.mutate_to = args.mutate_to.upper()
+
+    # check that the mutate_to has one amino acid to mutate to
+    if args.method == "convert" and (len(args.mutate_to) != 1 or (args.mutate_to not in AMINO_ACIDS)):
         parser.error("Usage: mutate_to argument needs to contain one character representing one amino acid.")
 
     # check if file exists
@@ -112,38 +129,43 @@ def most_common_codon(tf, aa):
     codons = defaultdict(int)
 
     # iterates over all the aa of the idr
-    for index in range(len(tf.protein_idr)):
-        if tf.protein_idr[index] != aa:    # not the amino acid we are looking for
+    for index in range(len(tf.full_protein)):
+        if tf.full_protein[index] != aa:    # not the amino acid we are looking for
             continue
 
-        codons[tf.dna_idr[index]] += 1     # count the codon of the amino acid
+        codons[tf.full_dna[index]] += 1     # count the codon of the amino acid
 
     return max(codons, key = codons.get)   # return the most common codon
 
 
-def aa_to_aa(tf, aa_to_mutate, aa_mutate_to):
-    # mutate the amino acid to a different amino acid
-
+def convert(tf, aa_to_mutate, aa_mutate_to):
+    #get a TF and mutate the amino acid to a different amino acid
+    aa_to_mutate_list = list(aa_to_mutate)
     # craete a mask of all the places where the aa is found in the idr
-    mask = np.isin(tf.protein_idr, aa_to_mutate)
+    mask = np.isin(tf.protein_idr, aa_to_mutate_list)
 
     # mutate the protein
     tf.protein_idr[mask] = aa_mutate_to
     # mutate the dna based on the most frequent codon of that aa
     tf.dna_idr[mask] = most_common_codon(tf, aa_mutate_to)
     
+    # assemble the full sequence
+    tf.assemble_mutated_sequence()
+
     # succeeded in mutating the TF
     return True
 
 def shift(tf, aa_to_shift):
-    # gets the TF and which group of amino acids to apply the shift method on
-    # and mutate the tf accordingly
+    # gets a TF and which group of amino acids to apply the shift method on
+    # and mutate the TF accordingly
 
     # initializing the move to 0
     move = 0
+    mutated_protein = tf.protein_idr.copy()
+    mutated_dna = tf.dna_idr.copy()
 
     # itirate over all AA by index
-    for i in range(1, len(tf.protein_idr)):
+    for i in range(1, len(tf.protein_idr) - 1):
         if move == 1:                       # to skip shifing twice
             move = 0
             continue
@@ -152,8 +174,8 @@ def shift(tf, aa_to_shift):
             move = choice([-1, 1])               # randomly decide where to shift
 
             # doing the shifting
-            tf.protein_idr[i], tf.protein_idr[i + move] = tf.protein_idr[i + move], tf.protein_idr[i]
-            tf.dna_idr[i], tf.dna_idr[i + move] = tf.dna_idr[i + move], tf.dna_idr[i]
+            mutated_protein[i], mutated_protein[i + move] = mutated_protein[i + move], mutated_protein[i]
+            mutated_dna[i], mutated_dna[i + move] = mutated_dna[i + move], mutated_dna[i]
 
             '''
             ## optional- check to see if creating clusters
@@ -162,13 +184,34 @@ def shift(tf, aa_to_shift):
                 tf.protein_idr[i], tf.protein_idr[i + move] = tf.protein_idr[i + move], tf.protein_idr[i]
                 tf.dna_idr[i], tf.dna_idr[i + move] = tf.dna_idr[i + move], tf.dna_idr[i]
             '''
+    
+    tf.protein_idr = mutated_protein
+    tf.dna_idr = mutated_dna
+    # assemble the full sequence
+    tf.assemble_mutated_sequence()
 
     # succeeded in mutating the TF
     return True
 
-def output(tf):
+
+def output(tfs_list, output_file):
     # write a new file with the mutated TF and name it apropriatly
-    ...
+
+    # prepare a dictof the resulted mutations
+    tfs_output = []
+    for tf in tfs_list:
+        tf_dict = {"TF_name": tf.name, "mutated_protein_seq": tf.mutated_protein, "mutated_DNA_seq": tf.mutated_dna}
+        tfs_output.append(tf_dict)
+
+    # create the output file
+    with open(output_file, 'w') as file:
+        writer = csv.DictWriter(file, fieldnames= list(tfs_output[0].keys()))
+
+        writer.writeheader()
+        writer.writerows(tfs_output)
+    
+    # print a messege that all had done
+    print(output_file, "created successfully.")
 
 
 
