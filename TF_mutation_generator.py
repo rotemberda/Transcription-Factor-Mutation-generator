@@ -6,10 +6,7 @@ import argparse
 import os.path
 from collections import defaultdict    # for handeling count with dict
 
-'''
-left to do:
-* write the test file
-'''
+
 
 # all the representations of the amino acids
 AMINO_ACIDS = "ACDEFGHIKLMNPQRSTVWY"
