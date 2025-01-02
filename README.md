@@ -37,7 +37,7 @@ Run the script with the following arguments:
 
 ```bash
 python TF_mutation_generator.py --input_csv <input_file> \
-    --mutation_targets <amino_acids_to_mutate> --method <mutation_method> /
+    --mutation_targets <amino_acids_to_mutate> --method <mutation_method> \
     [--mutate_to <target_amino_acid>]
 ```
 
