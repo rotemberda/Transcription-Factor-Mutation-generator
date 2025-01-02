@@ -51,7 +51,7 @@ python TF_mutation_generator.py --input_csv <input_file> \
 - `--mutate_to` (optional): A string of a target amino acid. Required when applying the `convert` method.
 
 
-### Example
+### Example- Convert Method
 
 #### Input CSV:
 
@@ -78,13 +78,10 @@ example_tf1,DDDDEFA*,ddddddddddddeeefffaaasss
 example_tf2,DDDDEFA*,ddddddddddddeeefffaaasss
 ```
 
-## Special Mutation Methods
 
-### Shift Method
+### Example- Shift Method
 
 The shift method takes a string of amino acids and, for each occurrence in the TF's IDR sequence, moves it one base upstream or downstream (randomly). This can introduce subtle positional changes in the sequence for advanced analysis.
-
-### Example
 
 #### Input CSV:
 
