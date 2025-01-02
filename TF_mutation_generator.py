@@ -1,9 +1,6 @@
 import numpy as np
 from random import choice
-import re
-import csv
-import argparse
-import os.path
+import csv, argparse, os.path
 from collections import defaultdict    # for handeling count with dict
 
 
@@ -187,13 +184,6 @@ def shift(tf, aa_to_shift):
             mutated_protein[i], mutated_protein[i + move] = mutated_protein[i + move], mutated_protein[i]
             mutated_dna[i], mutated_dna[i + move] = mutated_dna[i + move], mutated_dna[i]
 
-            '''
-            ## optional- check to see if creating clusters
-            if re.search(fr'[{"".join(aa_to_shift)}]{{5,}}', "".join(tf.protein_idr.tolist())):
-                # if created a cluster of hydrophobics, cancel the switch
-                tf.protein_idr[i], tf.protein_idr[i + move] = tf.protein_idr[i + move], tf.protein_idr[i]
-                tf.dna_idr[i], tf.dna_idr[i + move] = tf.dna_idr[i + move], tf.dna_idr[i]
-            '''
     
     tf.protein_idr = mutated_protein
     tf.dna_idr = mutated_dna
