@@ -11,8 +11,11 @@ left to do:
 * write the test file
 '''
 
+# all the representations of the amino acids
 AMINO_ACIDS = "ACDEFGHIKLMNPQRSTVWY"
-methods = ['convert', 'shift']
+
+# the available methods
+METHODS = ['convert', 'shift']
 
 
 def main():
@@ -76,11 +79,11 @@ def validate_inputs():
     parser = argparse.ArgumentParser(description="This program mutates a transcription factor sequence based on specified criteria")
     parser.add_argument('--input_csv', help = 'Input file name', required= True, type = str)
     parser.add_argument('--mutation_targets', help = 'A string of amino acids to mutate', required= True, type = str)
-    parser.add_argument("--method", help="Mutation method to apply. Options: " + str(methods), required= True,choices=methods, type = str)
+    parser.add_argument("--method", help="Mutation method to apply. Options: " + str(METHODS), required= True, choices=METHODS, type = str)
     parser.add_argument("--mutate_to", help="A target amino acid to mutate into", type = str)
     
 
-    # Parse the arguments
+    # parse the arguments
     args = parser.parse_args()
 
     # check if a target amino acid was provided if the convert method was applied
@@ -89,8 +92,12 @@ def validate_inputs():
     
     # make sure the aminoacids are in uppercase format
     args.mutation_targets = args.mutation_targets.upper()
-    if args.method == "convert":
-        args.mutate_to = args.mutate_to.upper()
+    args.mutate_to = args.mutate_to.upper() if args.method == "convert" else None
+
+    # check that the mutation_targets indeed in the represent amino acids
+    for aa in args.mutation_targets:
+        if aa not in AMINO_ACIDS:
+            parser.error(f"{aa} do not represent an amino acid.")
 
     # check that the mutate_to has one amino acid to mutate to
     if args.method == "convert" and (len(args.mutate_to) != 1 or (args.mutate_to not in AMINO_ACIDS)):
@@ -118,7 +125,13 @@ def load_data(filename):
         tf_list = []
 
         for row in reader:
-            tf = TF(name= row["TF_name"], full_protein= row["protein_seq"], protein_DBD= row["protein_DBD_seq"], full_DNA= row["DNA_seq"], DNA_DBD= row["DNA_DBD_seq"])
+            tf = TF(
+                name= row["TF_name"].strip(),
+                full_protein= row["protein_seq"].strip(),
+                protein_DBD= row["protein_DBD_seq"].strip(),
+                full_DNA= row["DNA_seq"].strip(),
+                DNA_DBD= row["DNA_DBD_seq"].strip()
+            )
             tf_list.append(tf)
     
     return tf_list
@@ -197,7 +210,7 @@ def shift(tf, aa_to_shift):
 def output(tfs_list, output_file):
     # write a new file with the mutated TF and name it apropriatly
 
-    # prepare a dictof the resulted mutations
+    # prepare a dict of the resulted mutations
     tfs_output = []
     for tf in tfs_list:
         tf_dict = {"TF_name": tf.name, "mutated_protein_seq": tf.mutated_protein, "mutated_DNA_seq": tf.mutated_dna}
