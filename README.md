@@ -108,6 +108,59 @@ example_tf1,ACADEFA*,aa1cccaaadddeeefffaaasss
 example_tf2,ACADEFA*,aaacccaa1dddeeefffaaasss
 ```
 
+## Testing
+The tool includes a comprehensive test suite that verifies the core functionality and input validation of the mutation generator.
+
+### Running Tests
+To run the test suite:
+```bash
+pytest test_TF_mutation_generator.py
+```
+
+### Test Coverage
+The test suite covers the following components:
+
+1. Input Validation (`test_validate_inputs()`)
+   - Command-line argument validation
+   - File existence and format checking
+   - Amino acid validation
+   - Method validation
+   - Required argument combinations
+   - Case sensitivity handling
+
+2. Data Loading (`test_load_data()`, `test_TF()`)
+   - CSV file parsing
+   - TF object creation
+   - IDR (Intrinsically Disordered Region) identification
+   - Sequence cleaning and array conversion
+   - Whitespace handling
+
+3. Core Mutation Methods
+   - Convert method (`test_convert()`)
+     - Amino acid conversion
+     - DNA sequence updates
+     - DBD preservation
+   - Shift method (`test_shift()`)
+     - Upstream and downstream shifts
+     - Multiple amino acid handling
+     - Random shift direction
+
+4. Utility Functions
+   - Most common codon identification (`test_most_common_codon()`)
+   - Output file generation (`test_output()`)
+     - CSV formatting
+     - Data integrity
+     - File handling
+
+### Adding New Tests
+When adding new functionality to the tool, please:
+
+1. Create test cases in the existing test file
+2. Follow the current naming convention: `test_functionname()`
+3. Use descriptive test names that indicate the functionality being tested
+4. Include test cases for both valid and invalid inputs
+5. Mock external dependencies when necessary (see examples using `patch`)
+
 ## Acknowledgments
 
 Thank you for using the Transcription Factor Mutation Tool! Feel free to reach out with any questions or feedback.
