@@ -25,14 +25,14 @@ def main():
         for tf in tf_list:
             convert(tf, args.mutation_targets, args.mutate_to)
 
-        output(tf_list, output_file)
 
     elif args.method == "shift":
         output_file = args.input_csv[:-4] + "_" + args.mutation_targets + "_" + args.method + ".csv"
         for tf in tf_list:
             shift(tf, args.mutation_targets)
         
-        output(tf_list, output_file)
+    # create output
+    output(tf_list, output_file)
 
 class TF:
     # defining Transcription Factor class
