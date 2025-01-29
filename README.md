@@ -2,7 +2,7 @@
 
 ## Overview
 
-This Python tool facilitates the generation of mutations in transcription factor (TF) sequences. It enables users to provide custom inputs for mutating specific amino acids in the intrinsically disordered region (IDR) of a TF sequence, and outputs a new CSV file containing the resulting mutated sequences. Additionally, it includes advanced mutation generation methods, such as the **shift** and **convert method**.
+This Python tool facilitates the generation of mutations in transcription factor (TF) sequences. It enables users to provide custom inputs for mutating specific amino acids in the intrinsically disordered region (IDR) of a TF sequence without changing its DNA binding domain (DBD) region, and outputs a new CSV file containing the resulting mutated sequences. Additionally, it includes advanced mutation generation methods, such as the **shift** and **convert method**.
 
 ## Features
 
